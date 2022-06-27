@@ -16,8 +16,16 @@
 #include <fstream>
 #include <iomanip>
 
-#pragma warning(push)
-#pragma warning(disable : 4514 4711)
+#ifdef _MSC_VER
+  #define UTEST_MSVC_PUSH_WARNING(x) __pragma(warning(push)) __pragma(warning(disable : x))
+  #define UTEST_MSVC_POP_WARNING() __pragma(warning(pop))
+
+#else
+  #define UTEST_MSVC_PUSH_WARNING(x)
+  #define UTEST_MSVC_POP_WARNING()
+#endif
+
+UTEST_MSVC_PUSH_WARNING(4514)
 
 #if __cplusplus >= 201703L
   #define UTEST_INLINE_CONSTEXPR inline constexpr
@@ -167,13 +175,8 @@
 #define UTEST_STRINGIFY(X) UTEST_STR(X)
 #define UTEST_STR(X) #X
 
-#define UTEST_PUSH_WARNING() __pragma(warning(push))\
-__pragma(warning(disable : 4127))
- 
-#define UTEST_POP_WARNING() __pragma(warning(pop))
-
 #define EXPECT_IMPL(S, Expr)                                                                                           \
-UTEST_PUSH_WARNING()\
+  UTEST_MSVC_PUSH_WARNING(4127)                                                                                        \
   try {                                                                                                                \
     utest::manager::state().check_count++;                                                                             \
     if (!(Expr)) {                                                                                                     \
@@ -188,8 +191,8 @@ UTEST_PUSH_WARNING()\
     }                                                                                                                  \
   } catch (const std::exception& e) {                                                                                  \
     throw e;                                                                                                           \
-  }\
-UTEST_POP_WARNING()
+  }                                                                                                                    \
+  UTEST_MSVC_POP_WARNING()
 
 #define EXPECT_EXCEPTION_IMPL(Expr, exception_type)                                                                    \
   do {                                                                                                                 \
@@ -235,28 +238,6 @@ UTEST_POP_WARNING()
   } while (0)
 
 #ifdef _MSC_VER
-//  #define UTEST_CASE_IMPL(group, name, desc)                                                                           \
-//    void name();                                                                                                       \
-//    namespace __unit_tests {                                                                                           \
-//    namespace {                                                                                                        \
-//      static int name##__TestRegistration() {                                                                          \
-//        utest::manager::add_test(group, #name, desc, &name);                                                           \
-//        return 0;                                                                                                      \
-//      }                                                                                                                \
-//      __pragma(data_seg(".CRT$XIU")) static int (*name##__TestRegistration2)() = name##__TestRegistration;             \
-//    } /* namespace */                                                                                                  \
-//    } /* namespace __unit_tests */                                                                                     \
-//    void name()
-//
-////  #define INITIALIZER(f)                                                                                               \
-////    static void f();                                                                                                   \
-////    static int __f1() {                                                                                                \
-////      f();                                                                                                             \
-////      return 0;                                                                                                        \
-////    }                                                                                                                  \
-////    __pragma(data_seg(".CRT$XIU")) static int (*__f2)() = __f1;                                                        \
-////    __pragma(data_seg()) static void f()
-//
 ////#define INITIALIZER(f) \
 ////    static void f();\
 ////    static int __f1(){f();return 0;}\
@@ -265,13 +246,15 @@ UTEST_POP_WARNING()
 ////    __pragma(data_seg())\
 ////    static void f()
 
-#define UTEST_CASE_IMPL(group, name, desc)                                                                           \
+  #define UTEST_CASE_IMPL(group, name, desc)                                                                           \
     void name();                                                                                                       \
     namespace __unit_tests {                                                                                           \
-    namespace {                                                                                                        \
-       struct name##__TestRegistration {  inline name##__TestRegistration() { utest::manager::add_test(group, #name, desc, &name); } };\
-       static name##__TestRegistration name##__testRegistration = name##__TestRegistration{};                           \
-    } /* namespace */                                                                                                  \
+      namespace {                                                                                                      \
+        struct name##__TestRegistration {                                                                              \
+          inline name##__TestRegistration() { utest::manager::add_test(group, #name, desc, &name); }                   \
+        };                                                                                                             \
+        static name##__TestRegistration name##__testRegistration = name##__TestRegistration{};                         \
+      } /* namespace */                                                                                                \
     } /* namespace __unit_tests */                                                                                     \
     void name()
 
@@ -279,27 +262,14 @@ UTEST_POP_WARNING()
   #define UTEST_CASE_IMPL(group, name, desc)                                                                           \
     void name();                                                                                                       \
     namespace __unit_tests {                                                                                           \
-    namespace {                                                                                                        \
-      __attribute__((constructor)) static void name##__TestRegistration() {                                            \
-        utest::manager::add_test(group, #name, desc, &name);                                                           \
-      }                                                                                                                \
-    } /* namespace */                                                                                                  \
+      namespace {                                                                                                      \
+        __attribute__((constructor)) static void name##__TestRegistration() {                                          \
+          utest::manager::add_test(group, #name, desc, &name);                                                         \
+        }                                                                                                              \
+      } /* namespace */                                                                                                \
     } /* namespace __unit_tests */                                                                                     \
     void name()
 #endif
-
-//    inline void name##__TestRegistration() __attribute__((constructor));
-
-//#define UTEST_CASE_IMPL(group, name, desc)                                                                             \
-//  void name();                                                                                                         \
-//  namespace __unit_tests {                                                                                             \
-//  namespace {                                                                                                          \
-//    __attribute__((constructor)) static void name##__TestRegistration() {                                              \
-//      utest::manager::add_test(group, #name, desc, &name);                                                             \
-//    }                                                                                                                  \
-//  } /* namespace */                                                                                                    \
-//  } /* namespace __unit_tests */                                                                                       \
-//  void name()
 
 namespace utest {
 typedef void (*test_function)();
@@ -524,7 +494,6 @@ public:
     vec.insert(std::upper_bound(vec.begin(), vec.end(), item, item_comparator()), std::move(item));
   }
 
-  inline static int run();
   inline static int run(int argc, const char* argv[]);
 
 private:
@@ -539,13 +508,6 @@ private:
   };
 };
 
-//class registration {
-//public:
-//  inline registration(const char* group, const char* name, const char* desc, test_function fct) {
-//    manager::add_test(group, name, desc, fct);
-//  }
-//};
-
 template <typename T1, typename T2>
 inline bool is_approximately_equal(T1 a, T2 b,
     detail::float_common_return_t<T1, T2> tolerance
@@ -557,8 +519,6 @@ inline bool is_approximately_equal(T1 a, T2 b,
 
   return (std::abs(fa - fb) <= tolerance) || (std::abs(fa - fb) < (std::max(std::abs(fa), std::abs(fb)) * tolerance));
 }
-
-int manager::run() { return manager::run(0, nullptr); }
 
 int manager::run(int argc, const char* argv[]) { return get_instance().run_impl(argc, argv); }
 
@@ -598,8 +558,7 @@ int manager::run_impl(int, const char*[]) {
   return static_cast<int>(m_state.failed_count);
 }
 
-//inline int run() { return manager::run(); }
-
 inline int run(int argc, const char* argv[]) { return manager::run(argc, argv); }
 } // namespace utest.
-#pragma warning(pop)
+
+UTEST_MSVC_POP_WARNING()
