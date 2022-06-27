@@ -25,7 +25,9 @@
   #define UTEST_MSVC_POP_WARNING()
 #endif
 
-UTEST_MSVC_PUSH_WARNING(4514)
+// C4514: unreferenced inline function has been removed.
+// C5045: mitigation.
+UTEST_MSVC_PUSH_WARNING(4514 5045)
 
 #if __cplusplus >= 201703L
   #define UTEST_INLINE_CONSTEXPR inline constexpr
@@ -51,7 +53,7 @@ UTEST_MSVC_PUSH_WARNING(4514)
 #elif __cplusplus >= 199711L
   #define UTEST_INLINE_CONSTEXPR static
   #define UTEST_NOEXCEPT throw()
-  #define UTEST_NORETURN //__attribute__((noreturn))
+  #define UTEST_NORETURN __declspec(noreturn) //__attribute__((noreturn))
   #define UTEST_CONSTEXPR
   #define UTEST_INLINE_VARIABLE static
 #else
@@ -508,6 +510,7 @@ private:
   };
 };
 
+//UTEST_MSVC_PUSH_WARNING(5045)
 template <typename T1, typename T2>
 inline bool is_approximately_equal(T1 a, T2 b,
     detail::float_common_return_t<T1, T2> tolerance
@@ -516,9 +519,9 @@ inline bool is_approximately_equal(T1 a, T2 b,
 
   const ftype fa = static_cast<ftype>(a);
   const ftype fb = static_cast<ftype>(b);
-
   return (std::abs(fa - fb) <= tolerance) || (std::abs(fa - fb) < (std::max(std::abs(fa), std::abs(fb)) * tolerance));
 }
+//UTEST_MSVC_POP_WARNING()
 
 int manager::run(int argc, const char* argv[]) { return get_instance().run_impl(argc, argv); }
 
