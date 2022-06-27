@@ -53,7 +53,13 @@ UTEST_MSVC_PUSH_WARNING(4514 5045)
 #elif __cplusplus >= 199711L
   #define UTEST_INLINE_CONSTEXPR static
   #define UTEST_NOEXCEPT throw()
-  #define UTEST_NORETURN __declspec(noreturn) //__attribute__((noreturn))
+
+  #ifdef _MSC_VER
+    #define UTEST_NORETURN __declspec(noreturn)
+  #else
+    #define UTEST_NORETURN __attribute__((noreturn))
+  #endif // _MSC_VER
+
   #define UTEST_CONSTEXPR
   #define UTEST_INLINE_VARIABLE static
 #else
@@ -240,13 +246,13 @@ UTEST_MSVC_PUSH_WARNING(4514 5045)
   } while (0)
 
 #ifdef _MSC_VER
-////#define INITIALIZER(f) \
-////    static void f();\
-////    static int __f1(){f();return 0;}\
-////    __pragma(data_seg(".CRT$XIU"))\
-////    static int(*__f2) () = __f1;\
-////    __pragma(data_seg())\
-////    static void f()
+//#define INITIALIZER(f) \
+//    static void f();\
+//    static int __f1(){f();return 0;}\
+//    __pragma(data_seg(".CRT$XIU"))\
+//    static int(*__f2) () = __f1;\
+//    __pragma(data_seg())\
+//    static void f()
 
   #define UTEST_CASE_IMPL(group, name, desc)                                                                           \
     void name();                                                                                                       \
@@ -414,8 +420,8 @@ public:
     char reserved[7];
 
     inline void add_check(bool success, const char* expr, const char* file, std::size_t line) {
-      results.push_back(check_result(
-          current_group, current_item, expr, file, line, (std::size_t)detail::get_us_count(test_start_time), success));
+      results.push_back(check_result(current_group, current_item, expr, file, line,
+          static_cast<std::size_t>(detail::get_us_count(test_start_time)), success));
     }
 
     inline void start_group(const test_map::value_type& g) {
@@ -510,7 +516,6 @@ private:
   };
 };
 
-//UTEST_MSVC_PUSH_WARNING(5045)
 template <typename T1, typename T2>
 inline bool is_approximately_equal(T1 a, T2 b,
     detail::float_common_return_t<T1, T2> tolerance
@@ -521,7 +526,6 @@ inline bool is_approximately_equal(T1 a, T2 b,
   const ftype fb = static_cast<ftype>(b);
   return (std::abs(fa - fb) <= tolerance) || (std::abs(fa - fb) < (std::max(std::abs(fa), std::abs(fb)) * tolerance));
 }
-//UTEST_MSVC_POP_WARNING()
 
 int manager::run(int argc, const char* argv[]) { return get_instance().run_impl(argc, argv); }
 

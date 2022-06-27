@@ -1,33 +1,20 @@
 cmake_minimum_required(VERSION 3.22.0)
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
-set(CMAKE_XCODE_GENERATE_SCHEME ON)
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-# No reason to set CMAKE_CONFIGURATION_TYPES if it's not a multiconfig generator.
-get_property(IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-if (IS_MULTI_CONFIG)
-    set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo" CACHE STRING "" FORCE)
-else()
-    if (NOT CMAKE_BUILD_TYPE)
-        set(CMAKE_BUILD_TYPE "Release"  CACHE STRING "Build type" FORCE)
-    endif()
-endif()
-
 project(utest VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(UTEST_BUILD_EXAMPLES "Build examples." ON)
 
+# utest interface.
 set(UTEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/utest.h")
-
 add_library(${PROJECT_NAME} INTERFACE ${UTEST_SOURCES})
-
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${UTEST_SOURCES})
-
 target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/examples/test)
+
+# Examples.
+if (UTEST_BUILD_EXAMPLES)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/examples)
+endif()
