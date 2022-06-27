@@ -59,7 +59,9 @@ TEST_CASE("Utils", Minimum2, "Check \"expression") {
   EXPECT_FLOAT_NE_T(4.5f, 4.7f, 0.01f);
 
   ASSERT_EXCEPTION([]() { throw std::range_error("bad range"); }(), std::range_error);
-  EXPECT_EXCEPTION([]() { throw std::range_error("bad range"); }(), std::exception);
-  EXPECT_EXCEPTION([]() { throw std::range_error("bad range"); }(), std::bad_cast);
+  //EXPECT_EXCEPTION([]() { throw std::range_error("bad range"); }(), std::exception);
+  //ASSERT_EXCEPTION([]() { throw std::range_error("bad range"); }(), std::bad_cast);
+
+  //ASSERT_EQ(5, 6);
 }
 } // namespace.

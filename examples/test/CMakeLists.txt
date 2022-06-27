@@ -26,8 +26,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     utest
-    "-framework AppKit"
-    "-framework Foundation"
+    #"-framework AppKit"
+    #"-framework Foundation"
 )
 
 # set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -36,11 +36,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 # )
 
 target_compile_options(${PROJECT_NAME} PUBLIC
-# -Wall
-# -Wextra
--Weverything
+    -Wall
+    #-Wextra
+#-Weverything
 # -Wno-global-constructors
--Wno-c++98-compat
+#-Wno-c++98-compat
 # -Wpedantic
 # -Woverloaded-virtual
 # -Wreorder
