@@ -16,6 +16,121 @@
 #include <fstream>
 #include <iomanip>
 
+///
+#define UTEST_MAIN()                                                                                                   \
+  int main(int argc, const char* argv[]) { return utest::run(argc, argv); }
+
+///
+#define TEST_CASE(group, name, desc) UTEST_CASE_IMPL(group, name, desc)
+
+// MARK: - Expects -
+
+///
+#define EXPECT_TRUE(Expr) EXPECT_IMPL(#Expr, Expr)
+
+///
+#define EXPECT_FALSE(Expr) EXPECT_IMPL(UTEST_STRINGIFY(!(Expr)), !(Expr))
+
+///
+#define EXPECT_EQ(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A == B), (A == B))
+
+///
+#define EXPECT_NE(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A != B), (A != B))
+
+///
+#define EXPECT_LT(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A < B), (A < B))
+
+///
+#define EXPECT_LE(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A <= B), (A <= B))
+
+///
+#define EXPECT_GT(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A > B), (A > B))
+
+///
+#define EXPECT_GE(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A >= B), (A >= B))
+
+///
+#define EXPECT_NOT_NULL(A) EXPECT_IMPL(UTEST_STRINGIFY(A != nullptr), (A != nullptr))
+
+///
+#define EXPECT_NULL(A) EXPECT_IMPL(UTEST_STRINGIFY(A == nullptr), (A == nullptr))
+
+///
+#define EXPECT_FLOAT_EQ(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A == B), utest::is_approximately_equal(A, B))
+
+///
+#define EXPECT_FLOAT_NE(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A != B), (!utest::is_approximately_equal(A, B)))
+
+/// Expect floating point compare with tolerance.
+#define EXPECT_FLOAT_EQ_T(A, B, T) EXPECT_IMPL(UTEST_STRINGIFY(A == B), utest::is_approximately_equal(A, B, T))
+
+///
+#define EXPECT_FLOAT_NE_T(A, B, T) EXPECT_IMPL(UTEST_STRINGIFY(A != B), (!utest::is_approximately_equal(A, B, T)))
+
+///
+#define EXPECT_STR_EQ(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A == B), (std::string(A) == std::string(B)))
+
+///
+#define EXPECT_STR_NE(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A != B), (std::string(A) != std::string(B)))
+
+///
+#define EXPECT_EXCEPTION(Expr, exception_type) EXPECT_EXCEPTION_IMPL(Expr, exception_type)
+
+// MARK: - Asserts -
+
+///
+#define ASSERT_TRUE(Expr) ASSERT_IMPL(#Expr, Expr)
+
+///
+#define ASSERT_FALSE(Expr) ASSERT_IMPL(UTEST_STRINGIFY(!(Expr)), !(Expr))
+
+///
+#define ASSERT_EQ(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A == B), (A == B))
+
+///
+#define ASSERT_NE(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A != B), (A != B))
+
+///
+#define ASSERT_LT(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A < B), (A < B))
+
+///
+#define ASSERT_LE(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A <= B), (A <= B))
+
+///
+#define ASSERT_GT(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A > B), (A > B))
+
+///
+#define ASSERT_GE(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A >= B), (A >= B))
+
+///
+#define ASSERT_NOT_NULL(A) ASSERT_IMPL(UTEST_STRINGIFY(A != nullptr), (A != nullptr))
+
+///
+#define ASSERT_NULL(A) ASSERT_IMPL(UTEST_STRINGIFY(A == nullptr), (A == nullptr))
+
+///
+#define ASSERT_FLOAT_EQ(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A == B), utest::is_approximately_equal(A, B))
+
+///
+#define ASSERT_FLOAT_NE(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A != B), (!utest::is_approximately_equal(A, B)))
+
+/// Assert floating point compare with tolerance.
+#define ASSERT_FLOAT_EQ_T(A, B, T) ASSERT_IMPL(UTEST_STRINGIFY(A == B), utest::is_approximately_equal(A, B, T))
+
+///
+#define ASSERT_FLOAT_NE_T(A, B, T) ASSERT_IMPL(UTEST_STRINGIFY(A != B), (!utest::is_approximately_equal(A, B, T)))
+
+///
+#define ASSERT_STR_EQ(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A == B), (std::string(A) == std::string(B)))
+
+///
+#define ASSERT_STR_NE(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A != B), (std::string(A) != std::string(B)))
+
+///
+#define ASSERT_EXCEPTION(Expr, exception_type) ASSERT_EXCEPTION_IMPL(Expr, exception_type)
+
+// MARK: - Macro implementations -
+
 #ifdef _MSC_VER
   #define UTEST_MSVC_PUSH_WARNING(x) __pragma(warning(push)) __pragma(warning(disable : x))
   #define UTEST_MSVC_POP_WARNING() __pragma(warning(pop))
@@ -62,123 +177,10 @@ UTEST_MSVC_PUSH_WARNING(4514 5045)
 
   #define UTEST_CONSTEXPR
   #define UTEST_INLINE_VARIABLE static
+
 #else
   #error Unsupported cpp version
-
 #endif
-
-///
-#define TEST_CASE(group, name, desc) UTEST_CASE_IMPL(group, name, desc)
-
-///
-#define EXPECT_TRUE(Expr) EXPECT_IMPL(#Expr, Expr)
-
-///
-#define EXPECT_FALSE(Expr) EXPECT_IMPL(UTEST_STRINGIFY(!(Expr)), !(Expr))
-
-///
-#define EXPECT_EQ(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A == B), (A == B))
-
-///
-#define EXPECT_NE(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A != B), (A != B))
-
-///
-#define EXPECT_LT(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A < B), (A < B))
-
-///
-#define EXPECT_LE(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A <= B), (A <= B))
-
-///
-#define EXPECT_GT(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A > B), (A > B))
-
-///
-#define EXPECT_GE(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A >= B), (A >= B))
-
-///
-#define EXPECT_NOT_NULL(A) EXPECT_IMPL(UTEST_STRINGIFY(A != nullptr), (A != nullptr))
-
-///
-#define EXPECT_NULL(A) EXPECT_IMPL(UTEST_STRINGIFY(A == nullptr), (A == nullptr))
-
-///
-#define EXPECT_FLOAT_EQ(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A == B), utest::is_approximately_equal(A, B))
-
-///
-#define EXPECT_FLOAT_NE(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A != B), (!utest::is_approximately_equal(A, B)))
-
-// Expect floating point compare with tolerance.
-
-///
-#define EXPECT_FLOAT_EQ_T(A, B, T) EXPECT_IMPL(UTEST_STRINGIFY(A == B), utest::is_approximately_equal(A, B, T))
-
-///
-#define EXPECT_FLOAT_NE_T(A, B, T) EXPECT_IMPL(UTEST_STRINGIFY(A != B), (!utest::is_approximately_equal(A, B, T)))
-
-///
-#define EXPECT_STR_EQ(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A == B), (std::string(A) == std::string(B)))
-
-///
-#define EXPECT_STR_NE(A, B) EXPECT_IMPL(UTEST_STRINGIFY(A != B), (std::string(A) != std::string(B)))
-
-///
-#define EXPECT_EXCEPTION(Expr, exception_type) EXPECT_EXCEPTION_IMPL(Expr, exception_type)
-
-///
-#define ASSERT_TRUE(Expr) ASSERT_IMPL(#Expr, Expr)
-
-///
-#define ASSERT_FALSE(Expr) ASSERT_IMPL(UTEST_STRINGIFY(!(Expr)), !(Expr))
-
-///
-#define ASSERT_EQ(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A == B), (A == B))
-
-///
-#define ASSERT_NE(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A != B), (A != B))
-
-///
-#define ASSERT_LT(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A < B), (A < B))
-
-///
-#define ASSERT_LE(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A <= B), (A <= B))
-
-///
-#define ASSERT_GT(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A > B), (A > B))
-
-///
-#define ASSERT_GE(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A >= B), (A >= B))
-
-///
-#define ASSERT_NOT_NULL(A) ASSERT_IMPL(UTEST_STRINGIFY(A != nullptr), (A != nullptr))
-
-///
-#define ASSERT_NULL(A) ASSERT_IMPL(UTEST_STRINGIFY(A == nullptr), (A == nullptr))
-
-///
-#define ASSERT_FLOAT_EQ(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A == B), utest::is_approximately_equal(A, B))
-
-///
-#define ASSERT_FLOAT_NE(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A != B), (!utest::is_approximately_equal(A, B)))
-
-// Assert floating point compare with tolerance.
-
-///
-#define ASSERT_FLOAT_EQ_T(A, B, T) ASSERT_IMPL(UTEST_STRINGIFY(A == B), utest::is_approximately_equal(A, B, T))
-
-///
-#define ASSERT_FLOAT_NE_T(A, B, T) ASSERT_IMPL(UTEST_STRINGIFY(A != B), (!utest::is_approximately_equal(A, B, T)))
-
-///
-#define ASSERT_STR_EQ(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A == B), (std::string(A) == std::string(B)))
-
-///
-#define ASSERT_STR_NE(A, B) ASSERT_IMPL(UTEST_STRINGIFY(A != B), (std::string(A) != std::string(B)))
-
-///
-#define ASSERT_EXCEPTION(Expr, exception_type) ASSERT_EXCEPTION_IMPL(Expr, exception_type)
-
-///
-#define UTEST_MAIN()                                                                                                   \
-  int main(int argc, const char* argv[]) { return utest::run(argc, argv); }
 
 #define UTEST_STRINGIFY(X) UTEST_STR(X)
 #define UTEST_STR(X) #X
@@ -246,14 +248,6 @@ UTEST_MSVC_PUSH_WARNING(4514 5045)
   } while (0)
 
 #ifdef _MSC_VER
-//#define INITIALIZER(f) \
-//    static void f();\
-//    static int __f1(){f();return 0;}\
-//    __pragma(data_seg(".CRT$XIU"))\
-//    static int(*__f2) () = __f1;\
-//    __pragma(data_seg())\
-//    static void f()
-
   #define UTEST_CASE_IMPL(group, name, desc)                                                                           \
     void name();                                                                                                       \
     namespace __unit_tests {                                                                                           \
@@ -280,7 +274,8 @@ UTEST_MSVC_PUSH_WARNING(4514 5045)
 #endif
 
 namespace utest {
-typedef void (*test_function)();
+
+// MARK: - Asserts and Exceptions -
 
 template <class = void>
 class test_exception : public std::exception {
@@ -362,11 +357,17 @@ namespace detail {
   UTEST_INLINE_CONSTEXPR const char* kTests = "tests";
 } // namespace detail
 
+// MARK: - Test data -
+
+typedef void (*test_function)();
+
 struct test_item {
   std::string name;
   std::string desc;
   test_function fct;
 };
+
+// MARK: - Test results -
 
 struct check_result {
   check_result() = default;
@@ -391,6 +392,8 @@ struct check_result {
   bool success;
   char reserved[7];
 };
+
+// MARK: - Tests manager -
 
 class manager {
 public:
@@ -515,6 +518,8 @@ private:
     inline bool operator()(const test_item& a, const test_item& b) const { return a.name < b.name; }
   };
 };
+
+// MARK: - Inline implementations -
 
 template <typename T1, typename T2>
 inline bool is_approximately_equal(T1 a, T2 b,
